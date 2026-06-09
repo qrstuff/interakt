@@ -1,0 +1,91 @@
+{
+  "name": "interakt",
+  "version": "0.1.0",
+  "description": "Reusable condition matcher for pricing, signup, and checkout recovery flows.",
+  "type": "module",
+  "author": {
+    "name": "Kalash Bajpai",
+    "email": "kalash@qrstuff.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qrstuff/interakt.git"
+  },
+  "bugs": {
+    "url": "https://github.com/qrstuff/interakt/issues"
+  },
+  "homepage": "https://github.com/qrstuff/interakt#readme",
+  "main": "./dist/interakt.umd.cjs",
+  "module": "./dist/interakt.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/interakt.es.js",
+      "require": "./dist/interakt.umd.cjs"
+    },
+    "./conditions": {
+      "types": "./dist/conditions/index.d.ts",
+      "import": "./dist/interakt.es.js",
+      "require": "./dist/interakt.umd.cjs"
+    },
+    "./context": {
+      "types": "./dist/context/index.d.ts",
+      "import": "./dist/interakt.es.js",
+      "require": "./dist/interakt.umd.cjs"
+    },
+    "./package.json": {
+      "default": "./package.json"
+    }
+  },
+  "unpkg": "./dist/interakt.umd.cjs",
+  "jsdelivr": "./dist/interakt.umd.cjs",
+  "files": [
+    "dist",
+    "README.md",
+    "demo"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "test": "jest --runInBand",
+    "test:e2e": "playwright test",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run build",
+    "pack:dry-run": "npm pack --dry-run"
+  },
+  "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^4.6.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.4",
+    "@playwright/test": "1.60.0",
+    "@types/jest": "29.5.14",
+    "eslint": "9.39.4",
+    "eslint-config-prettier": "10.1.5",
+    "jest": "29.7.0",
+    "jest-environment-jsdom": "29.7.0",
+    "prettier": "3.5.3",
+    "ts-jest": "29.3.4",
+    "typescript": "5.8.3",
+    "typescript-eslint": "8.32.1",
+    "vite": "6.4.3"
+  },
+  "keywords": [
+    "escape-hatch",
+    "condition-matcher",
+    "browser",
+    "pricing",
+    "signup",
+    "checkout",
+    "exit-intent",
+    "cdn"
+  ],
+  "license": "MIT"
+}
