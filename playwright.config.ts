@@ -12,7 +12,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'npm run dev -- --port 4173',
-    url: 'http://127.0.0.1:4173/demo/',
+    url: 'http://127.0.0.1:4173/docs/',
     reuseExistingServer: !process.env.CI
   },
   projects: [

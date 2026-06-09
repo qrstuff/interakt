@@ -640,57 +640,78 @@
       </div>
     </div>
 
-    <script type="module">
-      import Interakt, {
-        ElementWasHovered,
-        ElementWasVisible,
-        PageExited,
-        TimeOnPage
-      } from '/src/index.ts';
+    <script>
+      const packageVersion = '0.1.0';
 
-      const timeModal = new bootstrap.Modal(document.querySelector('#timeModal'));
-      const pricingModal = new bootstrap.Modal(document.querySelector('#pricingModal'));
-      const customPlanModal = new bootstrap.Modal(document.querySelector('#customPlanModal'));
-      const exitModal = new bootstrap.Modal(document.querySelector('#exitModal'));
+      function loadInteraktBundle(src) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.async = true;
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
 
-      const timedHatch = new Interakt({
-        userId: 'demo-user',
-        interval: 100,
-        conditions: [new TimeOnPage(5000)],
-        callback: () => {
-          timeModal.show();
+      async function bootDemo() {
+        try {
+          await loadInteraktBundle(
+            `https://unpkg.com/interakt@${packageVersion}/dist/interakt.umd.cjs`
+          );
+        } catch (error) {
+          await loadInteraktBundle('/dist/interakt.umd.cjs');
         }
-      });
 
-      const pricingHatch = new Interakt({
-        userId: 'demo-user',
-        interval: 100,
-        conditions: [new ElementWasVisible('#pricing', 0.2)],
-        callback: () => {
-          pricingModal.show();
-        }
-      });
+        const { Interakt, ElementWasHovered, ElementWasVisible, PageExited, TimeOnPage } =
+          window.Interakt;
 
-      const exitHatch = new Interakt({
-        interval: 100,
-        conditions: [new PageExited()],
-        callback: () => {
-          exitModal.show();
-        }
-      });
+        const timeModal = new bootstrap.Modal(document.querySelector('#timeModal'));
+        const pricingModal = new bootstrap.Modal(document.querySelector('#pricingModal'));
+        const customPlanModal = new bootstrap.Modal(document.querySelector('#customPlanModal'));
+        const exitModal = new bootstrap.Modal(document.querySelector('#exitModal'));
 
-      const customPlanHatch = new Interakt({
-        interval: 100,
-        conditions: [new ElementWasHovered('#custom-plan')],
-        callback: () => {
-          customPlanModal.show();
-        }
-      });
+        const timedHatch = new Interakt({
+          userId: 'demo-user',
+          interval: 100,
+          conditions: [new TimeOnPage(5000)],
+          callback: () => {
+            timeModal.show();
+          }
+        });
 
-      timedHatch.setUp();
-      pricingHatch.setUp();
-      customPlanHatch.setUp();
-      exitHatch.setUp();
+        const pricingHatch = new Interakt({
+          userId: 'demo-user',
+          interval: 100,
+          conditions: [new ElementWasVisible('#pricing', 0.2)],
+          callback: () => {
+            pricingModal.show();
+          }
+        });
+
+        const exitHatch = new Interakt({
+          interval: 100,
+          conditions: [new PageExited()],
+          callback: () => {
+            exitModal.show();
+          }
+        });
+
+        const customPlanHatch = new Interakt({
+          interval: 100,
+          conditions: [new ElementWasHovered('#custom-plan')],
+          callback: () => {
+            customPlanModal.show();
+          }
+        });
+
+        timedHatch.setUp();
+        pricingHatch.setUp();
+        customPlanHatch.setUp();
+        exitHatch.setUp();
+      }
+
+      void bootDemo();
     </script>
   </body>
 </html>

@@ -148,4 +148,4 @@ npm run test:e2e
 npm run build
 ```
 
-The demo page is available through Vite at `/demo/`.
+The docs demo page is available through Vite at `/docs/`.
