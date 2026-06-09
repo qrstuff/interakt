@@ -36,7 +36,7 @@ test('shows the custom plan Bootstrap modal after hovering the custom plan card'
 
   await page.locator('#custom-plan').hover();
 
-  await expect(page.locator('#customPlanModal')).toHaveClass(/show/, { timeout: 2000 });
+  await expect(page.locator('#customPlanModal')).toHaveClass(/show/, { timeout: 7000 });
   await expect(page.getByRole('heading', { name: 'Need a custom plan?' })).toBeVisible();
 });
 

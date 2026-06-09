@@ -681,6 +681,7 @@
 
       const customPlanHatch = new Interakt({
         interval: 100,
+        delay: 5000,
         conditions: [new ElementWasHovered('#custom-plan')],
         callback: () => {
           customPlanModal.show();
