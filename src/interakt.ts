@@ -1,7 +1,7 @@
 import type { Options } from './types';
 import { ContextSnapshot } from './context';
 
-export class EscapeHatch {
+export class Interakt {
   private readonly conditions: Options['conditions'];
   private readonly userId?: Options['userId'];
   private readonly interval: number;

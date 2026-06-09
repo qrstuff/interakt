@@ -11,9 +11,9 @@ npm install interakt
 ```
 
 ```ts
-import EscapeHatch, { ScrollPosition, TimeOnPage } from 'interakt';
+import Interakt, { ScrollPosition, TimeOnPage } from 'interakt';
 
-const hatch = new EscapeHatch({
+const hatch = new Interakt({
   userId: window.currentUser?.id,
   interval: 250,
   conditions: [new TimeOnPage(30_000), new ScrollPosition(70)],
@@ -38,7 +38,7 @@ Build output includes a standalone UMD bundle with a stable browser global:
 ```html
 <script src="https://cdn.example.com/interakt/0.1.0/interakt.umd.cjs"></script>
 <script>
-  var hatch = new window.Interakt.EscapeHatch({
+  var hatch = new window.Interakt.Interakt({
     userId: 'known-user',
     conditions: [new window.Interakt.TimeOnPage(30000)],
     callback: function (context) {
@@ -52,7 +52,7 @@ Build output includes a standalone UMD bundle with a stable browser global:
 
 ## Public API
 
-`new EscapeHatch(options)` creates an instance with a list of conditions and a callback.
+`new Interakt(options)` creates an instance with a list of conditions and a callback.
 
 `instance.setUp()` initializes context capture, runs condition setup hooks, waits for the optional delay, and starts polling conditions.
 
@@ -111,7 +111,7 @@ class CheckoutFailed {
 }
 ```
 
-Conditions can be synchronous or async. If a condition attaches listeners or observers, implement `destroy()` so `EscapeHatch.destroy()` can clean it up.
+Conditions can be synchronous or async. If a condition attaches listeners or observers, implement `destroy()` so `Interakt.destroy()` can clean it up.
 
 ## Context
 
