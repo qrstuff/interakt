@@ -1,6 +1,6 @@
 {
   "name": "interakt",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Reusable condition matcher for pricing, signup, and checkout recovery flows.",
   "type": "module",
   "author": {

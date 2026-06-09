@@ -36,7 +36,7 @@ await hatch.setUp();
 Build output includes a standalone UMD bundle with a stable browser global:
 
 ```html
-<script src="https://unpkg.com/interakt@0.1.0/dist/interakt.umd.cjs"></script>
+<script src="https://unpkg.com/interakt@0.1.1/dist/interakt.umd.cjs"></script>
 <script>
   var hatch = new window.Interakt.Interakt({
     userId: 'known-user',
