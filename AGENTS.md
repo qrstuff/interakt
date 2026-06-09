@@ -22,6 +22,10 @@ npx prettier . --write
 
 5. E2e tests must pass after changes before the work is considered complete.
 
+6. Keep `docs/index.html` and `tests/e2e/site/index.html` in sync. Their implementation and visible behavior should match, with only the library loading mechanism differing:
+   - `docs/index.html` should load the published library from `unpkg`
+   - `tests/e2e/site/index.html` should load the local library source for testability
+
 ## Minimum Verification After File Changes
 
 After file changes, run at minimum:
