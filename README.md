@@ -54,7 +54,7 @@ Build output includes a standalone UMD bundle with a stable browser global:
 
 `new Interakt(options)` creates an instance with a list of conditions and a callback.
 
-`instance.setUp()` initializes context capture, runs condition setup hooks, waits for the optional delay, and starts polling conditions.
+`instance.setUp()` initializes context capture, runs condition setup hooks, and starts polling conditions.
 
 `instance.destroy()` stops polling and asks conditions to remove their listeners or observers.
 
@@ -72,26 +72,117 @@ type Options = {
 };
 ```
 
-`userId` is optional. If omitted, the context snapshot resolves and stores a FingerprintJS visitor ID.
+`conditions`
 
-`interval` defaults to `250` milliseconds.
+- Type: `Condition[]`
+- Required: yes
+- Meaning: every condition in the array must evaluate to `true` before the callback is scheduled or executed.
 
-`delay` defers the first condition check.
+`callback`
+
+- Type: `(context: Context) => void | Promise<void>`
+- Required: yes
+- Meaning: host-owned side effect that runs after all conditions match.
+
+`userId`
+
+- Type: `string`
+- Required: no
+- Meaning: explicit user identifier to include in the context.
+- Default behavior: if omitted, the context snapshot resolves and stores a FingerprintJS visitor ID.
+
+`interval`
+
+- Type: `number`
+- Required: no
+- Units: milliseconds
+- Default: `250`
+- Meaning: polling interval for condition evaluation.
+
+`delay`
+
+- Type: `number`
+- Required: no
+- Units: milliseconds
+- Default: none
+- Meaning: waits after all conditions match and before the callback runs.
 
 ## Conditions
 
 Built-in conditions include:
 
-- `TimeOnPage(ms)`
-- `TimeOnSite(ms)`
-- `ScrollPosition(min?, max?, unit?)`
-- `ElementIsVisible(selector, threshold?)`
-- `ElementIsHovered(selector)`
-- `ElementWasClicked(selector)`
-- `ElementWasHovered(selector)`
-- `ElementWasVisible(selector, threshold?)`
-- `PageExited()`
-- `PreviousPage(...paths)`
+`TimeOnPage(nbf)`
+
+- Arguments:
+- `nbf: number`
+- Units: milliseconds
+- Meaning: passes when `context.duration.page >= nbf`.
+
+`TimeOnSite(nbf)`
+
+- Arguments:
+- `nbf: number`
+- Units: milliseconds
+- Meaning: passes when `context.duration.site >= nbf`.
+
+`ScrollPosition(min?, max?, unit?)`
+
+- Arguments:
+- `min?: number`
+- `max?: number`
+- `unit?: '%' | 'px'`
+- Default `unit`: `'%'`
+- Meaning: passes when the current scroll position is within the provided range.
+- Notes:
+- If `unit` is `'%'`, the condition uses `context.scroll.percent`.
+- If `unit` is `'px'`, the condition uses `context.scroll.px`.
+- `min` and `max` are both optional, but at least one should be supplied for useful behavior.
+
+`ElementIsVisible(selector, threshold?)`
+
+- Arguments:
+- `selector: string`
+- `threshold?: number`
+- Default `threshold`: `0.1`
+- Meaning: passes while the matched element is currently intersecting the viewport at the configured threshold.
+
+`ElementWasVisible(selector, threshold?)`
+
+- Arguments:
+- `selector: string`
+- `threshold?: number`
+- Default `threshold`: `0.1`
+- Meaning: passes after the matched element was visible and then became non-visible again.
+
+`ElementIsHovered(selector)`
+
+- Arguments:
+- `selector: string`
+- Meaning: passes while the matched element is currently hovered.
+
+`ElementWasHovered(selector)`
+
+- Arguments:
+- `selector: string`
+- Meaning: passes after the matched element has been hovered at least once.
+
+`ElementWasClicked(selector)`
+
+- Arguments:
+- `selector: string`
+- Meaning: passes after the matched element has been clicked at least once.
+
+`PageExited()`
+
+- Arguments:
+- none
+- Meaning: passes when exit intent is detected by a mouse leave event near the top edge of the page.
+
+`PreviousPage(...paths)`
+
+- Arguments:
+- `...paths: string[]`
+- Meaning: passes when the previous entry in the captured session history matches any supplied path.
 
 You can provide custom conditions:
 
@@ -113,27 +204,37 @@ class CheckoutFailed {
 
 Conditions can be synchronous or async. If a condition attaches listeners or observers, implement `destroy()` so `Interakt.destroy()` can clean it up.
 
+Custom conditions implement:
+
+```ts
+type Condition = {
+  setUp?: () => void | Promise<void>;
+  evaluate: (context: Context) => boolean | Promise<boolean>;
+  destroy?: () => void | Promise<void>;
+};
+```
+
 ## Context
 
 The callback receives:
 
 ```ts
 type Context = {
-  userId: string;
+  userId: string; // Explicit userId when provided, otherwise a stored FingerprintJS visitor id
   duration: {
-    site: number;
-    page: number;
+    site: number; // Milliseconds since the site session started in this browser tab/session
+    page: number; // Milliseconds since the current page instance was initialized
   };
   ts: {
-    site: Date;
-    page: Date;
+    site: Date; // Session start timestamp used to derive duration.site
+    page: Date; // Page start timestamp used to derive duration.page
   };
-  history: string[];
+  history: string[]; // Session path history captured in sessionStorage
   scroll: {
-    px: number;
-    percent: number;
+    px: number; // Current vertical scroll offset in pixels
+    percent: number; // Current vertical scroll progress as a percentage of scrollable height
   };
-  referrer: string | null;
+  referrer: string | null; // document.referrer for the current page load, or null when absent
 };
 ```
 

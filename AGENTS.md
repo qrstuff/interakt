@@ -23,8 +23,15 @@ npx prettier . --write
 5. E2e tests must pass after changes before the work is considered complete.
 
 6. Keep `docs/index.html` and `tests/e2e/site/index.html` in sync. Their implementation and visible behavior should match, with only the library loading mechanism differing:
+
    - `docs/index.html` should load the published library from `unpkg`
    - `tests/e2e/site/index.html` should load the local library source for testability
+
+7. Keep `README.md` in sync with the public API. Whenever options or built-in conditions are added, removed, renamed, or have argument/behavior changes, update the README documentation for:
+   - available options
+   - each built-in condition
+   - condition arguments and defaults
+   - any changed behavior semantics
 
 ## Minimum Verification After File Changes
 

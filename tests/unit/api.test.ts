@@ -88,4 +88,55 @@ describe('Interakt', () => {
       expect(hostEffect).toHaveBeenCalledWith('user_123', expect.arrayContaining(['/']))
     );
   });
+
+  it('delays callback execution until after all conditions are met', async () => {
+    jest.useFakeTimers();
+
+    try {
+      const callback = jest.fn();
+      const hatch = new Interakt({
+        userId: 'user_123',
+        conditions: [createCondition(jest.fn().mockReturnValue(true))],
+        delay: 100,
+        callback
+      });
+
+      await hatch.setUp();
+
+      expect(callback).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(99);
+      await Promise.resolve();
+      expect(callback).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(1);
+      await Promise.resolve();
+      expect(callback).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('cancels a delayed callback when destroyed before the delay elapses', async () => {
+    jest.useFakeTimers();
+
+    try {
+      const callback = jest.fn();
+      const hatch = new Interakt({
+        userId: 'user_123',
+        conditions: [createCondition(jest.fn().mockReturnValue(true))],
+        delay: 100,
+        callback
+      });
+
+      await hatch.setUp();
+      hatch.destroy();
+
+      jest.advanceTimersByTime(100);
+      await Promise.resolve();
+      expect(callback).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });

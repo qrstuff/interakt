@@ -8,7 +8,8 @@ export class Interakt {
   private readonly delay?: Options['delay'];
   private readonly callback: Options['callback'];
   private context?: ContextSnapshot;
-  private timer?: ReturnType<typeof setInterval>;
+  private timer1?: ReturnType<typeof setInterval>;
+  private timer2?: ReturnType<typeof setTimeout>;
   private isChecking = false;
   private hasTriggered = false;
 
@@ -29,20 +30,21 @@ export class Interakt {
       await condition.setUp?.();
     }
 
-    if (this.delay) {
-      await new Promise((resolve) => setTimeout(resolve, this.delay));
-    }
-
     await this.check();
     if (!this.hasTriggered) {
-      this.timer = setInterval(() => void this.check(), this.interval);
+      this.timer1 = setInterval(() => void this.check(), this.interval);
     }
   }
 
   destroy(): void {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = undefined;
+    if (this.timer1) {
+      clearInterval(this.timer1);
+      this.timer1 = undefined;
+    }
+
+    if (this.timer2) {
+      clearTimeout(this.timer2);
+      this.timer2 = undefined;
     }
 
     for (const condition of this.conditions) {
@@ -67,6 +69,15 @@ export class Interakt {
 
       this.hasTriggered = true;
       this.destroy();
+
+      if (this.delay && this.delay > 0) {
+        this.timer2 = setTimeout(() => {
+          this.timer2 = undefined;
+          void this.callback(ctx);
+        }, this.delay);
+        return;
+      }
+
       await this.callback(ctx);
     } finally {
       this.isChecking = false;
