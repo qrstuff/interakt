@@ -86,12 +86,13 @@ describe('conditions', () => {
       destroy: jest.fn()
     };
     const wrapped = new Not(condition);
+    const context = createContext();
 
     await wrapped.setUp?.();
     expect(condition.setUp).toHaveBeenCalledTimes(1);
 
-    await expect(wrapped.evaluate(createContext())).resolves.toBe(false);
-    expect(condition.evaluate).toHaveBeenCalledWith(createContext());
+    await expect(wrapped.evaluate(context)).resolves.toBe(false);
+    expect(condition.evaluate).toHaveBeenCalledWith(context);
 
     await wrapped.destroy?.();
     expect(condition.destroy).toHaveBeenCalledTimes(1);
