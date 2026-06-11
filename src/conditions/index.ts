@@ -2,6 +2,8 @@ export * from './types';
 export * from './time-on-site';
 export * from './time-on-page';
 export * from './scroll-position';
+export * from './not';
+export * from './is-mobile-device';
 export * from './element-is-visible';
 export * from './element-is-hovered';
 export * from './element-was-clicked';

@@ -1,7 +1,10 @@
+import device from 'current-device';
 import {
   ElementIsHovered,
+  IsMobileDevice,
   ElementWasClicked,
   ElementWasHovered,
+  Not,
   PageExited,
   PreviousPage,
   ScrollPosition,
@@ -9,6 +12,15 @@ import {
   TimeOnSite,
   type Context
 } from '../../src';
+
+jest.mock('current-device', () => ({
+  __esModule: true,
+  default: {
+    mobile: jest.fn()
+  }
+}));
+
+const mockedDevice = device as unknown as { mobile: jest.Mock<boolean, []> };
 
 function createContext(overrides: Partial<Context> = {}): Context {
   return {
@@ -32,6 +44,10 @@ function createContext(overrides: Partial<Context> = {}): Context {
 }
 
 describe('conditions', () => {
+  afterEach(() => {
+    mockedDevice.mobile.mockReset();
+  });
+
   it('evaluates page and site duration thresholds', () => {
     expect(new TimeOnPage(500).evaluate(createContext())).toBe(true);
     expect(new TimeOnPage(501).evaluate(createContext())).toBe(false);
@@ -53,6 +69,32 @@ describe('conditions', () => {
     expect(new PreviousPage('/billing').evaluate(createContext({ history: ['/signup'] }))).toBe(
       false
     );
+  });
+
+  it('detects whether the current device is mobile', () => {
+    mockedDevice.mobile.mockReturnValueOnce(true);
+    expect(new IsMobileDevice().evaluate()).toBe(true);
+
+    mockedDevice.mobile.mockReturnValueOnce(false);
+    expect(new IsMobileDevice().evaluate()).toBe(false);
+  });
+
+  it('negates another condition result and forwards lifecycle hooks', async () => {
+    const condition = {
+      setUp: jest.fn(),
+      evaluate: jest.fn().mockReturnValue(true),
+      destroy: jest.fn()
+    };
+    const wrapped = new Not(condition);
+
+    await wrapped.setUp?.();
+    expect(condition.setUp).toHaveBeenCalledTimes(1);
+
+    await expect(wrapped.evaluate(createContext())).resolves.toBe(false);
+    expect(condition.evaluate).toHaveBeenCalledWith(createContext());
+
+    await wrapped.destroy?.();
+    expect(condition.destroy).toHaveBeenCalledTimes(1);
   });
 
   it('detects page exit intent and removes its listener on destroy', () => {

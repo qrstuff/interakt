@@ -118,12 +118,20 @@ Built-in conditions include:
 - Units: milliseconds
 - Meaning: passes when `context.duration.page >= nbf`.
 
+```ts
+new TimeOnPage(30_000);
+```
+
 `TimeOnSite(nbf)`
 
 - Arguments:
 - `nbf: number`
 - Units: milliseconds
 - Meaning: passes when `context.duration.site >= nbf`.
+
+```ts
+new TimeOnSite(120_000);
+```
 
 `ScrollPosition(min?, max?, unit?)`
 
@@ -138,6 +146,37 @@ Built-in conditions include:
 - If `unit` is `'px'`, the condition uses `context.scroll.px`.
 - `min` and `max` are both optional, but at least one should be supplied for useful behavior.
 
+```ts
+new ScrollPosition(70);
+new ScrollPosition(25, 50);
+new ScrollPosition(400, undefined, 'px');
+```
+
+`Not(condition)`
+
+- Arguments:
+- `condition: Condition`
+- Meaning: inverts the wrapped condition result.
+- Notes:
+- `setUp()` and `destroy()` are forwarded to the wrapped condition when present.
+
+```ts
+new Not(new IsMobileDevice());
+new Not(new PreviousPage('/checkout'));
+```
+
+`IsMobileDevice()`
+
+- Arguments:
+- none
+- Meaning: passes when the current device is detected as mobile.
+- Notes:
+- Implemented using [`current-device`](https://github.com/matthewhudson/current-device).
+
+```ts
+new IsMobileDevice();
+```
+
 `ElementIsVisible(selector, threshold?)`
 
 - Arguments:
@@ -145,6 +184,11 @@ Built-in conditions include:
 - `threshold?: number`
 - Default `threshold`: `0.1`
 - Meaning: passes while the matched element is currently intersecting the viewport at the configured threshold.
+
+```ts
+new ElementIsVisible('#pricing');
+new ElementIsVisible('#cta', 0.5);
+```
 
 `ElementWasVisible(selector, threshold?)`
 
@@ -154,11 +198,20 @@ Built-in conditions include:
 - Default `threshold`: `0.1`
 - Meaning: passes after the matched element was visible and then became non-visible again.
 
+```ts
+new ElementWasVisible('#pricing');
+new ElementWasVisible('.hero-banner', 0.25);
+```
+
 `ElementIsHovered(selector)`
 
 - Arguments:
 - `selector: string`
 - Meaning: passes while the matched element is currently hovered.
+
+```ts
+new ElementIsHovered('#custom-plan');
+```
 
 `ElementWasHovered(selector)`
 
@@ -166,11 +219,19 @@ Built-in conditions include:
 - `selector: string`
 - Meaning: passes after the matched element has been hovered at least once.
 
+```ts
+new ElementWasHovered('#custom-plan');
+```
+
 `ElementWasClicked(selector)`
 
 - Arguments:
 - `selector: string`
 - Meaning: passes after the matched element has been clicked at least once.
+
+```ts
+new ElementWasClicked('#signup-button');
+```
 
 `PageExited()`
 
@@ -178,11 +239,20 @@ Built-in conditions include:
 - none
 - Meaning: passes when exit intent is detected by a mouse leave event near the top edge of the page.
 
+```ts
+new PageExited();
+```
+
 `PreviousPage(...paths)`
 
 - Arguments:
 - `...paths: string[]`
 - Meaning: passes when the previous entry in the captured session history matches any supplied path.
+
+```ts
+new PreviousPage('/pricing');
+new PreviousPage('/checkout', '/billing');
+```
 
 You can provide custom conditions:
 
