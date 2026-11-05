@@ -25,6 +25,7 @@ const mockedDevice = device as unknown as { mobile: jest.Mock<boolean, []> };
 function createContext(overrides: Partial<Context> = {}): Context {
   return {
     userId: 'user_123',
+    userIdSource: 'explicit',
     duration: {
       site: 1000,
       page: 500

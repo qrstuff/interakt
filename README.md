@@ -67,6 +67,7 @@ type Options = {
   conditions: Condition[];
   callback: (context: Context) => void | Promise<void>;
   userId?: string;
+  fingerprintConsent?: () => boolean | Promise<boolean>;
   interval?: number;
   delay?: number;
 };
@@ -89,7 +90,18 @@ type Options = {
 - Type: `string`
 - Required: no
 - Meaning: explicit user identifier to include in the context.
-- Default behavior: if omitted, the context snapshot resolves and stores a FingerprintJS visitor ID.
+- Default behavior: if omitted, `context.userId` is `null` unless `fingerprintConsent` allows a visitor ID.
+
+`fingerprintConsent`
+
+- Type: `() => boolean | Promise<boolean>`
+- Required: no
+- Default: none, so no fingerprinting and nothing written to `localStorage`
+- Meaning: host-owned consent check, called on every context build. Only when it returns `true` does the snapshot load FingerprintJS (as a separate chunk) and store the visitor ID in `localStorage`.
+- Notes:
+- Wire this to your cookie consent banner. Return `true` only after the visitor has accepted the relevant category.
+- If it returns `false` or throws, any stored visitor ID is removed and `context.userId` is `null`.
+- An explicit `userId` always wins, and fingerprinting is skipped.
 
 `interval`
 
@@ -290,7 +302,8 @@ The callback receives:
 
 ```ts
 type Context = {
-  userId: string; // Explicit userId when provided, otherwise a stored FingerprintJS visitor id
+  userId: string | null; // Explicit userId, else a FingerprintJS visitor id after consent, else null
+  userIdSource: 'explicit' | 'fingerprint' | 'none';
   duration: {
     site: number; // Milliseconds since the site session started in this browser tab/session
     page: number; // Milliseconds since the current page instance was initialized

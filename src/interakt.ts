@@ -4,6 +4,7 @@ import { ContextSnapshot } from './context';
 export class Interakt {
   private readonly conditions: Options['conditions'];
   private readonly userId?: Options['userId'];
+  private readonly fingerprintConsent?: Options['fingerprintConsent'];
   private readonly interval: number;
   private readonly delay?: Options['delay'];
   private readonly callback: Options['callback'];
@@ -16,6 +17,7 @@ export class Interakt {
   constructor(options: Options) {
     this.conditions = options.conditions;
     this.userId = options.userId;
+    this.fingerprintConsent = options.fingerprintConsent;
     this.interval = options.interval ?? 250;
     this.delay = options.delay;
     this.callback = options.callback;
@@ -23,7 +25,7 @@ export class Interakt {
 
   async setUp(): Promise<void> {
     this.destroy();
-    this.context = new ContextSnapshot(this.userId);
+    this.context = new ContextSnapshot(this.userId, this.fingerprintConsent);
     this.hasTriggered = false;
 
     for (const condition of this.conditions) {

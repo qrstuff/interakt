@@ -1,12 +1,16 @@
-import FingerprintJS from '@fingerprintjs/fingerprintjs';
-import type { Context } from './types';
+import type { Context, FingerprintConsent, UserIdSource } from './types';
+
+const VISITOR_ID_KEY = 'userId';
 
 export class ContextSnapshot {
   private userId?: string;
+  private fingerprintConsent?: FingerprintConsent;
+  private visitorId?: string;
   private pageStartTime: Date;
 
-  constructor(userId?: string) {
+  constructor(userId?: string, fingerprintConsent?: FingerprintConsent) {
     this.userId = userId;
+    this.fingerprintConsent = fingerprintConsent;
     this.pageStartTime = new Date();
     this.addToHistory(window.location.pathname);
   }
@@ -45,24 +49,56 @@ export class ContextSnapshot {
     return now;
   }
 
-  private async getUserId(): Promise<string> {
-    if (this.userId) {
-      return Promise.resolve(this.userId);
+  private async hasFingerprintConsent(): Promise<boolean> {
+    if (!this.fingerprintConsent) {
+      return false;
     }
 
-    const stored = localStorage.getItem('userId');
+    try {
+      return (await this.fingerprintConsent()) === true;
+    } catch {
+      return false;
+    }
+  }
+
+  private async getVisitorId(): Promise<string | null> {
+    if (!(await this.hasFingerprintConsent())) {
+      this.visitorId = undefined;
+      localStorage.removeItem(VISITOR_ID_KEY);
+      return null;
+    }
+
+    if (this.visitorId) {
+      return this.visitorId;
+    }
+
+    const stored = localStorage.getItem(VISITOR_ID_KEY);
     if (stored) {
-      this.userId = stored;
+      this.visitorId = stored;
       return stored;
     }
 
-    const userId = await FingerprintJS.load()
+    const { default: FingerprintJS } = await import('@fingerprintjs/fingerprintjs');
+    const visitorId = await FingerprintJS.load()
       .then((fp) => fp.get())
       .then((result) => result.visitorId);
-    localStorage.setItem('userId', userId);
-    this.userId = userId;
+    localStorage.setItem(VISITOR_ID_KEY, visitorId);
+    this.visitorId = visitorId;
 
-    return userId;
+    return visitorId;
+  }
+
+  private async getIdentity(): Promise<{ userId: string | null; userIdSource: UserIdSource }> {
+    if (this.userId) {
+      return { userId: this.userId, userIdSource: 'explicit' };
+    }
+
+    const visitorId = await this.getVisitorId();
+    if (visitorId) {
+      return { userId: visitorId, userIdSource: 'fingerprint' };
+    }
+
+    return { userId: null, userIdSource: 'none' };
   }
 
   async build(): Promise<Context> {
@@ -74,7 +110,7 @@ export class ContextSnapshot {
     const scrollY = window.scrollY || window.pageYOffset;
 
     return {
-      userId: await this.getUserId(),
+      ...(await this.getIdentity()),
       duration: {
         site: now.getTime() - this.getSiteStartTime().getTime(),
         page: now.getTime() - this.getPageStartTime().getTime()
