@@ -10,6 +10,7 @@
 ### Added
 
 - `fingerprintConsent?: () => boolean | Promise<boolean>`. A host-owned consent check runs on every context build. FingerprintJS is lazily loaded (a separate chunk in the ES build) only after consent.
+- `storageConsent?: () => boolean | Promise<boolean>`. When provided, session history and site start time stay in memory until it returns `true`. Omit it to keep the previous `sessionStorage` behaviour.
 
 ### Changed
 

@@ -68,6 +68,7 @@ type Options = {
   callback: (context: Context) => void | Promise<void>;
   userId?: string;
   fingerprintConsent?: () => boolean | Promise<boolean>;
+  storageConsent?: () => boolean | Promise<boolean>;
   interval?: number;
   delay?: number;
 };
@@ -102,6 +103,14 @@ type Options = {
 - Wire this to your cookie consent banner. Return `true` only after the visitor has accepted the relevant category.
 - If it returns `false` or throws, any stored visitor ID is removed and `context.userId` is `null`.
 - An explicit `userId` always wins, and fingerprinting is skipped.
+
+`storageConsent`
+
+- Type: `() => boolean | Promise<boolean>`
+- Required: no
+- Default: none, so session history and site start time are kept in `sessionStorage` as before
+- Meaning: when provided, `sessionStorage` is only used while it returns `true`. Otherwise history is just the current page, site time equals page time, and any stored keys are removed.
+- Notes: pass the same check as `fingerprintConsent` when nothing may be stored before consent.
 
 `interval`
 

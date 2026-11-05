@@ -7,6 +7,7 @@ export interface Options {
   conditions: Condition[];
   userId?: string;
   fingerprintConsent?: FingerprintConsent;
+  storageConsent?: FingerprintConsent;
   interval?: number;
   delay?: number;
   callback: (ctx: Context) => MaybePromise<void>;

@@ -113,3 +113,51 @@ describe('ContextSnapshot', () => {
     expect(context.history).toEqual(['/pricing']);
   });
 });
+
+describe('ContextSnapshot storage consent', () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
+  it('keeps using sessionStorage when no storageConsent option is given', async () => {
+    window.history.pushState({}, '', '/pricing');
+
+    await new ContextSnapshot('known_user').build();
+
+    expect(sessionStorage.getItem('history')).toBe(JSON.stringify(['/pricing']));
+    expect(sessionStorage.getItem('siteStartTime')).not.toBeNull();
+  });
+
+  it('writes nothing to sessionStorage without storage consent', async () => {
+    sessionStorage.setItem('history', JSON.stringify(['/old']));
+    sessionStorage.setItem('siteStartTime', new Date(0).toISOString());
+    window.history.pushState({}, '', '/pricing');
+
+    const context = await new ContextSnapshot(undefined, undefined, () => false).build();
+
+    expect(context.history).toEqual(['/pricing']);
+    expect(context.ts.site).toEqual(context.ts.page);
+    expect(sessionStorage.getItem('history')).toBeNull();
+    expect(sessionStorage.getItem('siteStartTime')).toBeNull();
+  });
+
+  it('treats a throwing storage consent check as refusal', async () => {
+    window.history.pushState({}, '', '/pricing');
+
+    await new ContextSnapshot(undefined, undefined, () => {
+      throw new Error('banner not ready');
+    }).build();
+
+    expect(sessionStorage.getItem('history')).toBeNull();
+  });
+
+  it('persists history once storage consent is granted', async () => {
+    window.history.pushState({}, '', '/a');
+    await new ContextSnapshot(undefined, undefined, () => true).build();
+    window.history.pushState({}, '', '/pricing');
+
+    const context = await new ContextSnapshot(undefined, undefined, async () => true).build();
+
+    expect(context.history).toEqual(['/a', '/pricing']);
+  });
+});

@@ -5,6 +5,7 @@ export class Interakt {
   private readonly conditions: Options['conditions'];
   private readonly userId?: Options['userId'];
   private readonly fingerprintConsent?: Options['fingerprintConsent'];
+  private readonly storageConsent?: Options['storageConsent'];
   private readonly interval: number;
   private readonly delay?: Options['delay'];
   private readonly callback: Options['callback'];
@@ -18,6 +19,7 @@ export class Interakt {
     this.conditions = options.conditions;
     this.userId = options.userId;
     this.fingerprintConsent = options.fingerprintConsent;
+    this.storageConsent = options.storageConsent;
     this.interval = options.interval ?? 250;
     this.delay = options.delay;
     this.callback = options.callback;
@@ -25,7 +27,11 @@ export class Interakt {
 
   async setUp(): Promise<void> {
     this.destroy();
-    this.context = new ContextSnapshot(this.userId, this.fingerprintConsent);
+    this.context = new ContextSnapshot(
+      this.userId,
+      this.fingerprintConsent,
+      this.storageConsent
+    );
     this.hasTriggered = false;
 
     for (const condition of this.conditions) {
