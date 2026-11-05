@@ -5,7 +5,7 @@ const mockLoad = jest.fn().mockResolvedValue({ get: mockGet });
 
 jest.mock('@fingerprintjs/fingerprintjs', () => ({
   __esModule: true,
-  default: { load: () => mockLoad() }
+  default: { load: (options?: unknown) => mockLoad(options) }
 }));
 
 describe('ContextSnapshot fingerprinting', () => {
@@ -45,6 +45,7 @@ describe('ContextSnapshot fingerprinting', () => {
     expect(context.userId).toBe('fp_visitor');
     expect(context.userIdSource).toBe('fingerprint');
     expect(localStorage.getItem('userId')).toBe('fp_visitor');
+    expect(mockLoad).toHaveBeenCalledWith({ monitoring: false });
   });
 
   it('drops the stored visitor id when consent is withdrawn', async () => {
@@ -54,6 +55,20 @@ describe('ContextSnapshot fingerprinting', () => {
 
     consent = false;
     const context = await snapshot.build();
+
+    expect(context.userId).toBeNull();
+    expect(localStorage.getItem('userId')).toBeNull();
+  });
+
+  it('does not store a visitor id when consent is withdrawn while fingerprinting', async () => {
+    localStorage.clear();
+    let consent = true;
+    mockGet.mockImplementationOnce(async () => {
+      consent = false;
+      return { visitorId: 'fp_visitor' };
+    });
+
+    const context = await new ContextSnapshot(undefined, () => consent).build();
 
     expect(context.userId).toBeNull();
     expect(localStorage.getItem('userId')).toBeNull();

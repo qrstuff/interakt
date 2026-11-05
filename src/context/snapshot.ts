@@ -105,9 +105,18 @@ export class ContextSnapshot {
     }
 
     const { default: FingerprintJS } = await import('@fingerprintjs/fingerprintjs');
-    const visitorId = await FingerprintJS.load()
+    // `monitoring` is read at runtime but missing from the published typings;
+    // false stops FingerprintJS's usage beacon to openfpcdn.io.
+    const options: Parameters<typeof FingerprintJS.load>[0] & { monitoring: boolean } = {
+      monitoring: false
+    };
+    const visitorId = await FingerprintJS.load(options)
       .then((fp) => fp.get())
       .then((result) => result.visitorId);
+    // Consent can be withdrawn while FingerprintJS runs; never store after that.
+    if (!(await ContextSnapshot.granted(this.fingerprintConsent))) {
+      return null;
+    }
     localStorage.setItem(VISITOR_ID_KEY, visitorId);
     this.visitorId = visitorId;
 
