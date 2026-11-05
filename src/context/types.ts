@@ -1,5 +1,10 @@
+export type FingerprintConsent = () => boolean | Promise<boolean>;
+
+export type UserIdSource = 'explicit' | 'fingerprint' | 'none';
+
 export type Context = {
-  userId: string;
+  userId: string | null;
+  userIdSource: UserIdSource;
   duration: {
     site: number;
     page: number;
